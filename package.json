@@ -1,0 +1,23 @@
+{
+  "name": "phonebook-backend",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build:ui": "\"@powershell Remove-Item -Recurse -Force dist && cd ../../part2/phonebook && npm run build && @powershell Copy-Item dist -Recurse ../../part3/phonebook-backend\"",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Berkan Sözer",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
