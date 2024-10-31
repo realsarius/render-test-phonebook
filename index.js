@@ -82,7 +82,7 @@ app.delete('/api/persons/:id', (req, res) => {
 });
 
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body;
 
     if (body.name === undefined) {
@@ -96,19 +96,13 @@ app.post('/api/persons', (request, response) => {
 
     person.save().then(savedPerson => {
         response.json(savedPerson)
-    })
+    }).catch(error => next(error))
 });
 
-app.put("/api/persons/:id", (req, res,next) => {
-    const id = req.params.id;
-    const body = req.body;
+app.put("/api/persons/:id", (req, res, next) => {
+    const {name, phone} = req.body;
 
-    const updatePerson = {
-        name: body.name,
-        phone: body.phone,
-    }
-
-    Person.findByIdAndUpdate(id, updatePerson, {new: true, runValidators: true})
+    Person.findByIdAndUpdate(req.params.id, {name, phone}, {new: true, runValidators: true, context: "query"})
         .then(updatedPerson => {
             if (updatedPerson) {
                 res.status(200).json(updatedPerson);
@@ -130,6 +124,8 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === "CastError") {
         return response.status(400).send({error: "invalid ID format", details: error.message})
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({error: error.message})
     }
 
     next(error)
