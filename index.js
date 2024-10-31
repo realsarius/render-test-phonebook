@@ -4,9 +4,15 @@ const Person = require('./model/person');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const {mongo} = require("mongoose");
 const mongoose = require("mongoose");
 const app = express();
+
+const requestLogger = (req, res, next) => {
+    console.log(`${req.method} ${req.url} - ${new Date().toISOString()}`);
+    next();
+}
+
+app.use(requestLogger);
 
 app.use(express.json());
 app.use(cors());
@@ -92,6 +98,44 @@ app.post('/api/persons', (request, response) => {
         response.json(savedPerson)
     })
 });
+
+app.put("/api/persons/:id", (req, res,next) => {
+    const id = req.params.id;
+    const body = req.body;
+
+    const updatePerson = {
+        name: body.name,
+        phone: body.phone,
+    }
+
+    Person.findByIdAndUpdate(id, updatePerson, {new: true, runValidators: true})
+        .then(updatedPerson => {
+            if (updatedPerson) {
+                res.status(200).json(updatedPerson);
+            } else {
+                res.status(404).json({error: "Person not found"});
+            }
+        })
+        .catch(error => next(error));
+})
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({error: "unknown endpoint "});
+}
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+    console.log(error.message);
+
+    if (error.name === "CastError") {
+        return response.status(400).send({error: "invalid ID format", details: error.message})
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
