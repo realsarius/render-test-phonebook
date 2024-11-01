@@ -46,7 +46,6 @@ app.get("/info", (req, res) => {
                 <p>${currentDate.toUTCString()}</p>
                     `)
     })
-
 });
 
 app.get('/api/persons/:id', (req, res) => {
@@ -62,7 +61,6 @@ app.get('/api/persons/:id', (req, res) => {
         }).catch(error => {
         res.status(500).json({error: "invalid ID format", details: error.message})
     });
-
 });
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -111,7 +109,7 @@ app.put("/api/persons/:id", (req, res, next) => {
             }
         })
         .catch(error => next(error));
-})
+});
 
 const unknownEndpoint = (request, response) => {
     response.status(404).send({error: "unknown endpoint "});
